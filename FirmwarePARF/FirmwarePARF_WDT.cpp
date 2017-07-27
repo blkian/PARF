@@ -1,12 +1,13 @@
 
 /* =================[Inclusiones]============================================================ */
-#include <avr/io.h> // Defines de registros
-#include <stdint.h> // Tipos de datos estandar
-#include <avr/interrupt.h> // Funciones cli() y sei().
+#include <avr/io.h>
+#include <stdint.h>
+#include <avr/interrupt.h>
 
 #include <avr/wdt.h>
 
 #include "FirmwarePARF_WDT.h"
+#include "FirmwarePARF_LowPow.h"
 
 /* =================[Definiciones y macros internos]========================================= */
 
