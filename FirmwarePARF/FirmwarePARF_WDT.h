@@ -1,26 +1,29 @@
-#ifndef ARDUWATCHDOG_COM_H
-#define ARDUWATCHDOG_COM_H
+#ifndef FIRMWAREPARF_WDT_H
+#define FIRMWAREPARF_WDT_H
 /*==================[Descripcion]=============================================================*/
+/* Modulo encargado del manejo del periferico Watch Dog Timer (WDT) */
 
 /*==================[TODO]====================================================================*/
 
 /*==================[Dependencias]============================================================*/
 
 /*==================[Definicion de macros externos]===========================================*/
+
 /*==================[Declaracion de funciones externas]=======================================*/
 /**
- * Inicializa la comunicacion serie y el buffer de recepcion
- */
-void Com_init(void);
-
+* Inicializo el periferico de Watchdog, configurado para resetear el micro
+* si no se resetea durante 8 segundos
+* Recomendacion: antes de inicializar el wd, utilizar WDT_off()
+*/
+void WDT_init(void);
 /**
- * Devuelve 1 si hay un paquete disponible en el receptor
- */
-bool Com_paqueteDisponible(void);
-
+* Vuelve a 0 las cuentas del watchdog para evitar el reseteo del micro
+*/
+void WDT_reset(void);
 /**
- * Actualiza la recepcion de la comunicacion
- */
-void Com_rxUpdate(void);
+* Deshabilita el watchdog
+*/
+void WDT_off(void);
+
 /*==================[Fin del archivo]=========================================================*/
-#endif /* ARDUWATCHDOG_COM_H */
+#endif /* FIRMWAREPARF_WDT_H */

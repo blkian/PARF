@@ -1,8 +1,7 @@
 /* =================[Inclusiones]============================================================ */
 #include <arduino.h>
-#include <dht.h>
 
-#include "arduWatchdog_IO.h"
+#include "FirmwarePARF_IO.h"
 
 /* =================[Definiciones y macros internos]========================================= */
 // Definicion de salidas
@@ -38,8 +37,11 @@ void IO_toggleLed1(void){
     digitalWrite(IO_STATUSLED_1, led_status);
 } /* IO_toggleLed1 */
 
-void IO_setLed2(bool estado){
-    digitalWrite(IO_STATUSLED_2, estado);
+void IO_toggleLed2(void){
+    static bool led_status = false;
+  
+    led_status = !led_status;
+    digitalWrite(IO_STATUSLED_2, led_status);
 } /* IO_setLed2 */
 
 

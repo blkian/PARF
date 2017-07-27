@@ -6,7 +6,7 @@
 
 #include <avr/wdt.h>
 
-#include "arduWatchdog_WD.h"
+#include "FirmwarePARF_WDT.h"
 
 /* =================[Definiciones y macros internos]========================================= */
 

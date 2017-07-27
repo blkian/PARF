@@ -2,12 +2,11 @@
 /* =================[Inclusiones]============================================================ */
 #include <arduino.h>
 
-#include <cc1101.h>
-#include <ccpacket.h>
-//#include <util/crc16.h>
+#include "cc1101.h"
+#include "ccpacket.h"
 
-#include "arduWatchdog_Com.h"
-#include "arduWatchdog_IO.h"
+#include "FirmwarePARF_Com.h"
+//#include "FirmwarePARF_IO.h"
 
 /* =================[Definiciones y macros internos]========================================= */
 #define HAB_UARTDEBUG 1
@@ -28,6 +27,7 @@ static byte syncWord[2] = {199, 10};
 static bool gPaqueteDisponible = false;
 /*==================[Definicion de funciones internas]========================================*/
 // Get signal strength indicator in dBm.
+// Uso: Serial.print(rssi(packet.rssi)); // unidad en dBm
 // See: http://www.ti.com/lit/an/swra114d/swra114d.pdf
 int16_t rssi(int8_t raw) {
     int16_t rssi_dbm = 0;
@@ -45,6 +45,7 @@ int16_t rssi(int8_t raw) {
 } /* rssi */
 
 // Get link quality indicator.
+// Uso: Serial.print(lqi(packet.lqi));
 int lqi(char raw) {
     return 0x3F - raw;
 } /* lqi */
@@ -61,62 +62,44 @@ void Com_init(void){
     attachInterrupt(CC1101Interrupt, messageReceived, FALLING);
 } /* Com_init */
 
-bool Com_paqueteDisponible(void){
-    return(gPaqueteDisponible);
-} /* Com_paqueteDisponible */
-
-void Com_rxUpdate(void){
-    static uint32_t miTiempo = 0;
-    static uint16_t counter = 0;
+bool Com_rxUpdate(void){
+    bool packetOK = false;
     uint8_t packetLength = 0;
-
-    if (gPaqueteDisponible) {
+    
+    if(gPaqueteDisponible){
         gPaqueteDisponible = false;
         CCPACKET packet;
-        if (radio.receiveData(&packet) > 0) { // Si algo me llegó
-            if(HAB_UARTDEBUG){ 
-              /*
-              Serial.println(F("Received packet..."));
-              Serial.print(F("lqi: ")); Serial.print(lqi(packet.lqi));
-              Serial.print(F(" ; rssi: ")); Serial.print(rssi(packet.rssi)); Serial.println(F("dBm"));
-              */
-            }
+        if(radio.receiveData(&packet) > 0){ // Si algo me llegó
             packetLength = packet.length;
-            if (packet.crc_ok && packetLength > 0) { // Si el crc esta ok y el largo es mayor a 0
-                /*
+            /*if(HAB_UARTDEBUG){ 
+                Serial.print("Paquete recibido. Largo: "); Serial.println(packetLength);
+                Serial.print("CRC OK: "); Serial.println(packet.crc_ok);
+            }*/
+            if(packet.crc_ok && packetLength > 0){ // Si el crc esta ok y el largo es mayor a 0
+                packetOK = true;
                 if(HAB_UARTDEBUG){ 
-                  Serial.print(F("packet: len "));Serial.println(packetLength);
-                  Serial.println("data: ");
-                  for(uint8_t i = 0; i<packetLength;i++){
-                    Serial.write(packet.data[i]);
-                  }
-                  Serial.println();
-                }
-                */
-                
-                if( packet.data[0] == '$'){
-                  if(millis() > miTiempo){
-                    miTiempo = millis() + 100;
-                    
-                    IO_toggleLed1();
-                    IO_setLed2(0);
-                  }
-                  if(HAB_UARTDEBUG){ 
-                      uint8_t id = packet.data[1] + '0';
-                      Serial.write(id); Serial.write(id); Serial.write(id); Serial.write(id); Serial.write(id);
-                      Serial.println();
+                    Serial.print("Addr: "); Serial.println(radio.devAddress);
+                    Serial.print("data: ");
+                    for(uint8_t i = 0; i<packetLength;i++){
+                        Serial.write(packet.data[i]);
                     }
+                    Serial.println();
                 }
             }
-            else{
-              IO_setLed2(1);
-            }
-        }
-        else{
-          IO_setLed2(1);
         }
     }
+    return(packetOK);
 } /* Com_rxUpdate */
+    
+void Com_txUpdate(void){
+    const char message[] = {65, 108, 111}; //Alo
+    CCPACKET packet;
+    
+    packet.length = strlen(message);
+    strncpy((char *) packet.data, message, packet.length);
+    radio.sendData(packet);
+} /* Com_txUpdate */
+
 
 /*==================[Definicion de ISR externas]==============================================*/
 // Funcion llamada cuando un mensaje es recibido

@@ -1,8 +1,7 @@
-#ifndef ARDUWATCHDOG_WDT_H
-#define ARDUWATCHDOG_WDT_H
+#ifndef FIRMWAREPARF_IO_H
+#define FIRMWAREPARF_IO_H
 /*==================[Descripcion]=============================================================*/
-/* Modulo encargado del manejo del periferico Watch Dog Timer (WDT) */
-
+/* Modulo encargado de manejar las entradas y salidas digitales y analogicas del sistema */
 /*==================[TODO]====================================================================*/
 
 /*==================[Dependencias]============================================================*/
@@ -11,19 +10,22 @@
 
 /*==================[Declaracion de funciones externas]=======================================*/
 /**
-* Inicializo el periferico de Watchdog, configurado para resetear el micro
-* si no se resetea durante 8 segundos
-* Recomendacion: antes de inicializar el wd, utilizar WDT_off()
-*/
-void WDT_init(void);
-/**
-* Vuelve a 0 las cuentas del watchdog para evitar el reseteo del micro
-*/
-void WDT_reset(void);
-/**
-* Deshabilita el watchdog
-*/
-void WDT_off(void);
+ * Inicializa las entradas y salidas digitales y analogicas del sistema
+ */
+void IO_init(void);
 
+/**
+ * Parpadea el led de status para inicidar que el sistema está activo
+ */
+void IO_estoyVivo(void);
+
+/**
+ * Devuelve el valor analogico del potenciometro con una resolucion de 10 bits
+ */
+uint16_t IO_getValorPote(void);
+
+void IO_toggleLed1(void);
+
+void IO_toggleLed2(void);
 /*==================[Fin del archivo]=========================================================*/
-#endif /* ARDUWATCHDOG_WDT_H */
+#endif /* FIRMWAREPARF_IO_H */
