@@ -11,8 +11,8 @@
 /* =================[Definiciones y macros internos]========================================= */
 #define HAB_UARTDEBUG 1
 
-#define Com_PACKET_START 0x24 // caracter de inicio de paquete ($)
-#define Com_PACKET_END 0x23 // caracter de final de paquete (#)
+#define Com_ADDRESS 0x02
+#define Com_TX_BUFFERSIZE 4
 
 #define CC1101Interrupt 0 // Pin 0
 #define CC1101_GDO0 2 // Pin 2
@@ -22,7 +22,7 @@ int lqi(char raw);
 void messageReceived(void);
 /*==================[Definicion de datos internos]============================================*/
 static CC1101 radio;
-
+static uint8_t gTxBuffer[Com_TX_BUFFERSIZE];
 static byte syncWord[2] = {199, 10};
 static bool gPaqueteDisponible = false;
 /*==================[Definicion de funciones internas]========================================*/
@@ -51,13 +51,19 @@ int lqi(char raw) {
 } /* lqi */
 /*==================[Definicion de funciones externas]========================================*/
 void Com_init(void){
+    uint8_t i = 0;
+
+    for(i=0;i<Com_TX_BUFFERSIZE;i++){
+        gTxBuffer[i] = 0;
+    }
+    
     if(HAB_UARTDEBUG){ Serial.begin(9600); }
   
     radio.init();
-    radio.setSyncWord(syncWord);
+    radio.setSyncWord(syncWord[0],syncWord[1]);
     radio.setCarrierFreq(CFREQ_433);
     radio.disableAddressCheck();
-    radio.setTxPowerAmp(PA_LongDistance);
+    radio.setTxPowerAmp(PA_LowPower);
     // habilito interrupcion por recepcion
     attachInterrupt(CC1101Interrupt, messageReceived, FALLING);
 } /* Com_init */
@@ -71,14 +77,14 @@ bool Com_rxUpdate(void){
         CCPACKET packet;
         if(radio.receiveData(&packet) > 0){ // Si algo me llegó
             packetLength = packet.length;
-            /*if(HAB_UARTDEBUG){ 
-                Serial.print("Paquete recibido. Largo: "); Serial.println(packetLength);
-                Serial.print("CRC OK: "); Serial.println(packet.crc_ok);
-            }*/
+            if(HAB_UARTDEBUG){ 
+                Serial.print("Paquete recibido. Largo: "); Serial.print(packetLength);
+                //Serial.print(". CRC OK: "); Serial.print(packet.crc_ok);
+            }
             if(packet.crc_ok && packetLength > 0){ // Si el crc esta ok y el largo es mayor a 0
                 packetOK = true;
                 if(HAB_UARTDEBUG){ 
-                    Serial.print("Addr: "); Serial.println(radio.devAddress);
+                    
                     Serial.print("data: ");
                     for(uint8_t i = 0; i<packetLength;i++){
                         Serial.write(packet.data[i]);
@@ -92,15 +98,18 @@ bool Com_rxUpdate(void){
 } /* Com_rxUpdate */
     
 void Com_txUpdate(void){
-    const char message[] = {65, 108, 111}; //Alo
     CCPACKET packet;
-    
-    packet.length = strlen(message);
-    strncpy((char *) packet.data, message, packet.length);
+
+    gTxBuffer[0] = '-';
+    gTxBuffer[1] = 'A'; gTxBuffer[2] = 'l'; gTxBuffer[3] = 'o';
+    packet.length = Com_TX_BUFFERSIZE;
+    strncpy((char *) packet.data, gTxBuffer, packet.length);
     radio.sendData(packet);
 } /* Com_txUpdate */
 
-
+bool Com_paqueteDisponible(void){
+    return(gPaqueteDisponible);
+} /* Com_paqueteDisponible */
 /*==================[Definicion de ISR externas]==============================================*/
 // Funcion llamada cuando un mensaje es recibido
 void messageReceived(void) {

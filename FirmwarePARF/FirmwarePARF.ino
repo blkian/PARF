@@ -15,8 +15,10 @@
 
 /*==================[Definicion de funciones internas]========================================*/
 void setup() {
+    WDT_off();
+    WDT_init();
+  
     IO_init();
-    
     Com_init();
 }
 
@@ -34,6 +36,7 @@ void loop() {
         Com_txUpdate();
         IO_toggleLed2();
     }
+    WDT_reset();
     
 }
 /*==================[Definicion de funciones externas]========================================*/
