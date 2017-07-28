@@ -11,13 +11,9 @@
 
 /*==================[Declaracion de funciones externas]=======================================*/
 /**
-* Inicializo el periferico de Watchdog, configurado para resetear el micro
-* si no se resetea durante 8 segundos
-* Recomendacion: antes de inicializar el wd, utilizar WDT_off()
-*/
-void WDT_init(void);
-/**
-* Vuelve a 0 las cuentas del watchdog para evitar el reseteo del micro
+* Inicializo el periferico watchdog para que interrumpa cada 1 segundo y reseteo las cuentas
+* Luego del segundo la interrupcion se deshabilita automaticamente y se tiene 1 segundo mas
+* para resetear el WDT antes de que se reinicie el micro
 */
 void WDT_reset(void);
 /**

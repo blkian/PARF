@@ -24,9 +24,24 @@
 void LowPow_init(void);
 
 /**
- *  Entra al modo de bajo consumo
+ * Devuelve el contador de ciclos de sleep
  */
-void LowPow_start(void);
+int16_t LowPow_getContador(void);
+
+/**
+ * Setea el contador de ciclos de sleep
+ */
+void LowPow_setContador(int16_t nuevoVal);
+
+/**
+ *  Entra al modo de bajo consumo, indicando por cuando tiempo, en segundos
+ */
+void LowPow_sleep(int16_t segundos);
+
+/**
+ * Resetea el watchdog timer
+ */
+void LowPow_estoyVivo(void);
 
 /*==================[Fin del archivo]=========================================================*/
 #endif /* FIRMWAREPARF_LOWPOW_H */
