@@ -63,12 +63,13 @@ void LowPow_sleep(int16_t segundos){
     // Habilito el modo de bajo consumo. Solo el WDT y interrupciones externas lo resetean
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     sleep_enable();
-    
+    sleep_bod_disable();
     sei();
     while (gCiclosBajoConsumo > 0){ // Espero los ciclos que tengo que dormir
   
         // Habilito el modo en bajo consumo y lo inicio
-        sleep_mode();
+        //sleep_mode();
+        sleep_cpu();
         // De este punto el micro no pasa hasta que lo despierten
         // Cuando lo hacen entra a la interrupcion que lo desperto y continua
     }
